@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulator Interaktif Siklus Carnot & Laboratorium Termodinamika Kimia | Proyek UTS Rasya Putra Sagala</title>
+<style>
+:root {
+  --bg-dark: #070B14;
+  --bg-card: #0F172A;
+  --bg-card-hover: #1E293B;
+  --border: #334155;
+  --border-light: #475569;
+  
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+  
+  --crimson: #EF4444;
+  --crimson-glow: rgba(239, 68, 68, 0.35);
+  --amber: #F59E0B;
+  --amber-glow: rgba(245, 158, 11, 0.3);
+  --cryo: #0284C7;
+  --cryo-glow: rgba(2, 132, 199, 0.35);
+  --emerald: #10B981;
+  --emerald-glow: rgba(16, 185, 129, 0.25);
+  --slate-pad: #475569;
+  
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  padding: 16px;
+  overflow-x: hidden;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.brand-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #F8FAFC, #38BDF8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.author-badge {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid #38BDF8;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  color: #38BDF8;
+  text-align: right;
+}
+
+/* Telemetry Ribbon */
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.telemetry-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.telemetry-card:hover {
+  transform: translateY(-2px);
+  border-color: #38BDF8;
+}
+
+.telemetry-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.telemetry-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-main);
+  margin-top: 4px;
+}
+
+.val-crimson { color: var(--crimson); }
+.val-cryo { color: #38BDF8; }
+.val-emerald { color: var(--emerald); }
+.val-amber { color: var(--amber); }
+
+/* Main Grid */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 1200px) {
+  .main-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 860px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 8px;
+}
+
+.panel-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-phase {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  background: #334155;
+  color: #F8FAFC;
+}
+
+/* Canvas Styling */
+.canvas-wrapper {
+  position: relative;
+  background: #060911;
+  border: 1px solid #1E293B;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+canvas {
+  display: block;
+}
+
+/* Controls & Sliders */
+.control-group {
+  margin-bottom: 14px;
+}
+
+.control-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.control-value-readout {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #38BDF8;
+}
+
+input[type=range] {
+  width: 100%;
+  height: 6px;
+  background: #1E293B;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #38BDF8;
+  cursor: pointer;
+  border: 2px solid #0F172A;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+  transition: transform 0.1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* Button Toolbar */
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.btn {
+  background: #1E293B;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background: #334155;
+  border-color: #38BDF8;
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: #0284C7;
+  border-color: #38BDF8;
+  color: #FFFFFF;
+}
+
+.btn-primary:hover {
+  background: #0369A1;
+}
+
+.btn-preset {
+  font-size: 0.72rem;
+  padding: 6px 10px;
+  background: rgba(30, 41, 59, 0.6);
+  border-color: #334155;
+}
+
+.btn-preset:hover {
+  background: #0F172A;
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+/* Sensitivity Bar Box */
+.sensitivity-box {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid #1E293B;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.sensitivity-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+}
+
+.sens-bar-container {
+  height: 6px;
+  background: #1E293B;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.sens-bar-tc {
+  height: 100%;
+  background: #38BDF8;
+  width: 70%;
+}
+
+.sens-bar-th {
+  height: 100%;
+  background: var(--crimson);
+  width: 35%;
+}
+
+/* Pedagogical Live Commentary */
+.commentary-banner {
+  background: #0B1120;
+  border: 1px solid var(--border);
+  border-left: 4px solid #38BDF8;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: #E2E8F0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.commentary-banner strong {
+  color: #38BDF8;
+}
+
+/* Footer & Notes */
+footer {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-align: center;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 12px;
+}
+
+/* Phase Navigation Menu & Deep-Dive Inspector */
+.phase-menu-container {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(11, 17, 32, 0.95) 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.phase-menu-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 8px;
+}
+
+.phase-menu-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #38BDF8;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.phase-menu-hint {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.phase-nav-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 900px) {
+  .phase-nav-tabs {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 550px) {
+  .phase-nav-tabs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.phase-tab-btn {
+  background: #0B1120;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.phase-tab-btn:hover {
+  background: #1E293B;
+  border-color: #64748B;
+  transform: translateY(-2px);
+}
+
+.phase-tab-btn.active {
+  background: #1E293B;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+}
+
+.phase-tab-btn.active.phase-0 {
+  border-color: var(--crimson);
+  box-shadow: 0 0 16px var(--crimson-glow);
+}
+.phase-tab-btn.active.phase-1 {
+  border-color: #94A3B8;
+  box-shadow: 0 0 16px rgba(148, 163, 184, 0.25);
+}
+.phase-tab-btn.active.phase-2 {
+  border-color: var(--cryo);
+  box-shadow: 0 0 16px var(--cryo-glow);
+}
+.phase-tab-btn.active.phase-3 {
+  border-color: var(--amber);
+  box-shadow: 0 0 16px var(--amber-glow);
+}
+
+.tab-badge-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tab-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #1E293B;
+  color: var(--text-muted);
+}
+
+.tab-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.tab-title-text {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.tab-sub-text {
+  font-size: 0.70rem;
+  color: var(--text-dim);
+  line-height: 1.2;
+}
+
+/* Deep Dive Phase Inspector Grid */
+.inspector-card {
+  background: #060911;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.inspector-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.inspector-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inspector-meta-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.inspector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.pillar-box {
+  background: #0B1120;
+  border: 1px solid #1E293B;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.pillar-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pillar-content {
+  font-size: 0.78rem;
+  color: #CBD5E1;
+  line-height: 1.45;
+}
+
+.pillar-formula {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: #38BDF8;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.antimisconception-banner {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.76rem;
+  color: #FDE68A;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div>
+    <div class="brand-title">CARNOT-LAB PRO | Virtual Thermodynamic Engine & Scope</div>
+    <div class="brand-sub">Media Pembelajaran Interaktif Kimia Fisika: Kajian Kinetika Gas, Efisiensi Termal & Entropi</div>
+  </div>
+  <div class="author-badge">
+    <strong>Rasya Putra Sagala</strong> (06101182429009)<br>
+    Pendidikan Kimia FKIP Unsri • GKM3106
+  </div>
+</header>
+
+<!-- Telemetry Readout Bar -->
+<div class="telemetry-grid">
+  <div class="telemetry-card">
+    <div class="telemetry-label">Fase Aktif</div>
+    <div class="telemetry-value val-amber" id="readout-phase">Tahap I (A→B)</div>
+  </div>
+  <div class="telemetry-card">
+    <div class="telemetry-label">Suhu Sistem <i>T</i>(<i>t</i>)</div>
+    <div class="telemetry-value val-crimson" id="readout-temp">800,0 K</div>
+  </div>
+  <div class="telemetry-card">
+    <div class="telemetry-label">Tekanan <i>P</i>(<i>t</i>)</div>
+    <div class="telemetry-value" id="readout-press">26,26 atm</div>
+  </div>
+  <div class="telemetry-card">
+    <div class="telemetry-label">Volume <i>V</i>(<i>t</i>)</div>
+    <div class="telemetry-value" id="readout-vol">5,00 L</div>
+  </div>
+  <div class="telemetry-card">
+    <div class="telemetry-label">Kalor Masuk <i>q</i><sub>H</sub></div>
+    <div class="telemetry-value val-crimson" id="readout-qh">+9,22 kJ</div>
+  </div>
+  <div class="telemetry-card">
+    <div class="telemetry-label">Kalor Buang <i>q</i><sub>C</sub></div>
+    <div class="telemetry-value val-cryo" id="readout-qc">-4,61 kJ</div>
+  </div>
+  <div class="telemetry-card">
+    <div class="telemetry-label">Kerja Netto <i>W</i><sub>net</sub></div>
+    <div class="telemetry-value val-emerald" id="readout-wnet">+4,61 kJ</div>
+  </div>
+  <div class="telemetry-card">
+    <div class="telemetry-label">Efisiensi Carnot <i>η</i></div>
+    <div class="telemetry-value val-emerald" id="readout-eff">50,0 %</div>
+  </div>
+  <div class="telemetry-card">
+    <div class="telemetry-label">Δ<i>S</i> Siklus Netto</div>
+    <div class="telemetry-value" id="readout-ds">0,00 J/K</div>
+  </div>
+</div>
+
+
+<!-- Interactive Phase Navigation Menu & Deep-Dive Inspector -->
+<div class="phase-menu-container">
+  <div class="phase-menu-header">
+    <div class="phase-menu-title">
+      🧭 MENU NAVIGASI & BEDAH 4 FASE SIKLUS CARNOT (Klik untuk Memahami Setiap Tahap)
+    </div>
+    <div class="phase-menu-hint">
+      Pilih tahap untuk mempelajari fenomena molekuler, mekanika piston, rumus termodinamika & perilaku grafiknya
+    </div>
+  </div>
+
+  <!-- 4 Phase Tabs -->
+  <div class="phase-nav-tabs">
+    <button class="phase-tab-btn active phase-0" id="tab-phase-0" data-phase="0">
+      <div class="tab-badge-row">
+        <span class="tab-badge" style="color:#EF4444;">FASE I</span>
+        <span class="tab-indicator-dot" style="background:#EF4444;"></span>
+      </div>
+      <div class="tab-title-text">Ekspansi Isotermal Reversibel</div>
+      <div class="tab-sub-text">Titik A → B • <i>T</i> = <i>T</i><sub>H</sub> (800 K) • <i>q</i><sub>H</sub> Diserap • Δ<i>U</i> = 0</div>
+    </button>
+
+    <button class="phase-tab-btn phase-1" id="tab-phase-1" data-phase="1">
+      <div class="tab-badge-row">
+        <span class="tab-badge" style="color:#94A3B8;">FASE II</span>
+        <span class="tab-indicator-dot" style="background:#94A3B8;"></span>
+      </div>
+      <div class="tab-title-text">Ekspansi Adiabatik Reversibel</div>
+      <div class="tab-sub-text">Titik B → C • Insulator (<i>q</i> = 0) • <i>T</i><sub>H</sub> → <i>T</i><sub>C</sub> • Δ<i>S</i> = 0</div>
+    </button>
+
+    <button class="phase-tab-btn phase-2" id="tab-phase-2" data-phase="2">
+      <div class="tab-badge-row">
+        <span class="tab-badge" style="color:#0284C7;">FASE III</span>
+        <span class="tab-indicator-dot" style="background:#0284C7;"></span>
+      </div>
+      <div class="tab-title-text">Kompresi Isotermal Reversibel</div>
+      <div class="tab-sub-text">Titik C → D • <i>T</i> = <i>T</i><sub>C</sub> (400 K) • <i>q</i><sub>C</sub> Dibuang • Δ<i>U</i> = 0</div>
+    </button>
+
+    <button class="phase-tab-btn phase-3" id="tab-phase-3" data-phase="3">
+      <div class="tab-badge-row">
+        <span class="tab-badge" style="color:#F59E0B;">FASE IV</span>
+        <span class="tab-indicator-dot" style="background:#F59E0B;"></span>
+      </div>
+      <div class="tab-title-text">Kompresi Adiabatik Reversibel</div>
+      <div class="tab-sub-text">Titik D → A • Insulator (<i>q</i> = 0) • <i>T</i><sub>C</sub> → <i>T</i><sub>H</sub> • Menutup Siklus</div>
+    </button>
+  </div>
+
+  <!-- Deep-Dive Phase Inspector Card -->
+  <div class="inspector-card" id="inspector-card">
+    <div class="inspector-header">
+      <div class="inspector-title" id="insp-header-title">
+        <span style="color:#EF4444;">●</span> TAHAP I: EKSPANSI ISOTERMAL REVERSIBEL (A → B)
+      </div>
+      <div class="inspector-meta-badge" id="insp-header-badge" style="background:rgba(239, 68, 68, 0.2); color:#EF4444; border:1px solid #EF4444;">
+        Kontak: Reservoir Panas <i>T</i><sub>H</sub> = 800 K • Fluida Menyerap Kalor <i>q</i><sub>H</sub>
+      </div>
+    </div>
+
+    <div class="inspector-grid">
+      <!-- Pillar 1: Sub-Mikroskopis -->
+      <div class="pillar-box">
+        <div class="pillar-title" style="color:#EF4444;">🔬 Tingkat Mikroskopis (Partikel Gas)</div>
+        <div class="pillar-content" id="insp-micro">
+          Partikel molekul gas menerima pasokan energi kinetik termal dari dinding dasar silinder. Meskipun volume bertambah dan partikel berekspansi, kecepatan rata-rata partikel (<i>v</i><sub>rms</sub>) tetap konstan karena temperatur terjaga pada <i>T</i><sub>H</sub>.
+        </div>
+      </div>
+
+      <!-- Pillar 2: Makroskopis -->
+      <div class="pillar-box">
+        <div class="pillar-title" style="color:#38BDF8;">⚙️ Tingkat Makroskopis (Piston & Volume)</div>
+        <div class="pillar-content" id="insp-macro">
+          Piston bergerak naik secara kuasi-statik (teramat perlahan) dari volume <i>V</i><sub>A</sub> (5,0 L) ke <i>V</i><sub>B</sub> (10,0 L). Gaya dorong gas berimbang sempurna dengan gaya luar (<i>P</i><sub>int</sub> = <i>P</i><sub>ext</sub> ± <i>dP</i>).
+        </div>
+      </div>
+
+      <!-- Pillar 3: Termodinamika & Neraca -->
+      <div class="pillar-box">
+        <div class="pillar-title" style="color:#10B981;">⚡ Neraca Energi & Entropi Eksak</div>
+        <div class="pillar-content" id="insp-thermo">
+          • Δ<i>U</i><sub>I</sub> = 0 J (karena <i>U</i> = <i>f</i>(<i>T</i>), <i>dT</i> = 0)<br>
+          • Kerja: <i>w</i><sub>I</sub> = −<i>nRT</i><sub>H</sub> ln(<i>V</i><sub>B</sub>/<i>V</i><sub>A</sub>) = −9,22 kJ<br>
+          • Kalor: <i>q</i><sub>H</sub> = +9,22 kJ (Kalor masuk bernilai positif)<br>
+          • Entropi: Δ<i>S</i><sub>I</sub> = <i>q</i><sub>H</sub> / <i>T</i><sub>H</sub> = +11,53 J/K
+        </div>
+      </div>
+
+      <!-- Pillar 4: Respons Grafik -->
+      <div class="pillar-box">
+        <div class="pillar-title" style="color:#F59E0B;">📈 Karakteristik Kurva Grafik</div>
+        <div class="pillar-content" id="insp-graph">
+          • Bidang P-V: Titik bergerak meluncur turun ke kanan menyusuri kurva isotermal solid bergradien landai ((∂<i>P</i>/∂<i>V</i>)<sub><i>T</i></sub> = −<i>P</i>/<i>V</i>).<br>
+          • Bidang T-S: Garis lurus horizontal ke kanan pada ketinggian <i>T</i> = <i>T</i><sub>H</sub> (800 K).
+        </div>
+      </div>
+    </div>
+
+    <!-- Anti-Misconception Alert -->
+    <div class="antimisconception-banner" id="insp-alert">
+      <strong>⚠️ Poin Anti-Miskonsepsi Ujian:</strong> 
+      <span id="insp-alert-text">Mengapa Δ<i>U</i> = 0 padahal gas menyerap kalor sebesar 9,22 kJ? Karena seluruh energi kalor yang diserap langsung dialirkan keluar untuk mendorong piston (<i>w</i><sub>ekspansi</sub> = −<i>q</i><sub>H</sub>), sehingga energi dalam fluida kerja tidak menumpuk sama sekali!</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Grid -->
+<div class="main-grid">
+
+  <!-- Column 1: Physical Reactor Engine Viewport -->
+  <div class="panel-card">
+    <div class="panel-header">
+      <div class="panel-title">
+        <span style="color:#EF4444;">●</span> Silinder Reaktor & Dinamika Partikel
+      </div>
+      <div class="badge-phase" id="badge-contact">Kontak: <i>T</i><sub>H</sub> (800 K)</div>
+    </div>
+    
+    <div class="canvas-wrapper" style="height: 380px;">
+      <canvas id="engineCanvas" width="340" height="380"></canvas>
+    </div>
+
+    <!-- Live Phase Commentary -->
+    <div class="commentary-banner" id="commentary-box">
+      <div>
+        <strong id="comm-title">Tahap I: Ekspansi Isotermal Reversibel (A → B)</strong><br>
+        <span id="comm-text">Dasar silinder menempel pada Reservoir Panas <i>T</i><sub>H</sub> (800 K). Gas menyerap kalor <i>q</i><sub>H</sub> sambil berekspansi kuasi-statik dari 5,0 L ke 10,0 L. Energi dalam konstan (Δ<i>U</i> = 0), seluruh kalor dikonversi menjadi kerja ekspansi.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Column 2: Dual Thermodynamic Indicator Scope -->
+  <div class="panel-card">
+    <div class="panel-header">
+      <div class="panel-title">
+        <span style="color:#10B981;">●</span> Dual Scope: Diagram P–V & T–S Dinamis
+      </div>
+      <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">
+        Area Hijau = <i>W</i><sub>net</sub> (∮<i>P</i> d<i>V</i> = ∮<i>T</i> d<i>S</i>)
+      </div>
+    </div>
+    
+    <div class="canvas-wrapper" style="height: 380px;">
+      <canvas id="scopeCanvas" width="460" height="380"></canvas>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.75rem; color:var(--text-muted);">
+      <span>Kurva Solid = Isotermal (ΔT = 0)</span>
+      <span>Kurva Putus-putus = Adiabatik (ΔS = 0, Lebih Curam)</span>
+      <span>Arsiran Hijau = Kerja Netto Siklus</span>
+    </div>
+  </div>
+
+  <!-- Column 3: Control Panel, Sensitivity, and Presets -->
+  <div class="panel-card">
+    <div class="panel-header">
+      <div class="panel-title">
+        <span style="color:#38BDF8;">●</span> Parameter & Navigasi Siklus
+      </div>
+      <button class="btn btn-preset" id="btn-reset-cycle">↺ Reset</button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-play-pause">▶ Putar Tahap Aktif</button>
+      <button class="btn" id="btn-step-fwd">Tahap Berikutnya ❯</button>
+      <button class="btn" id="btn-step-back">❮ Sebelumnya</button>
+    </div>
+
+    <!-- Sliders -->
+    <div class="control-group">
+      <div class="control-label-row">
+        <span>Temperatur Reservoir Panas (<i>T</i><sub>H</sub>)</span>
+        <span class="control-value-readout" id="lbl-th">800 K</span>
+      </div>
+      <input type="range" id="slider-th" min="500" max="1100" step="25" value="800">
+    </div>
+
+    <div class="control-group">
+      <div class="control-label-row">
+        <span>Temperatur Reservoir Dingin (<i>T</i><sub>C</sub>)</span>
+        <span class="control-value-readout" id="lbl-tc">400 K</span>
+      </div>
+      <input type="range" id="slider-tc" min="250" max="550" step="25" value="400">
+    </div>
+
+    <div class="control-group">
+      <div class="control-label-row">
+        <span>Rasio Ekspansi Isotermal (<i>V</i><sub>B</sub> / <i>V</i><sub>A</sub>)</span>
+        <span class="control-value-readout" id="lbl-vratio">2.00 x</span>
+      </div>
+      <input type="range" id="slider-vratio" min="1.4" max="3.0" step="0.1" value="2.0">
+    </div>
+
+    <div class="control-group">
+      <div class="control-label-row">
+        <span>Kecepatan Animasi Simulasi</span>
+        <span class="control-value-readout" id="lbl-speed">1.0 x</span>
+      </div>
+      <input type="range" id="slider-speed" min="0.25" max="2.5" step="0.25" value="1.0">
+    </div>
+
+    <!-- Study Case Presets -->
+    <div style="margin-top:6px;">
+      <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:6px;">
+        PRESET STUDI KASUS KIMIA FISIKA (HOTS):
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-preset" id="preset-hots1">Soal 1 UTS (800K - 400K)</button>
+        <button class="btn btn-preset" id="preset-powerplant">Pembangkit Uap (823K - 300K)</button>
+        <button class="btn btn-preset" id="preset-cryo">Kriogenik (500K - 250K)</button>
+      </div>
+    </div>
+
+    <!-- Sensitivity Meter -->
+    <div class="sensitivity-box">
+      <div style="font-size:0.72rem; font-weight:700; color:#38BDF8; margin-bottom:6px;">
+        ANALISIS SENSITIVITAS TURUNAN PARSIAL EFISIENSI:
+      </div>
+      <div class="sensitivity-row">
+        <span>|∂<i>η</i>/∂<i>T</i><sub>C</sub>| = 1/<i>T</i><sub>H</sub> :</span>
+        <span id="readout-sens-tc" style="color:#38BDF8;">0,00125 K⁻¹</span>
+      </div>
+      <div class="sens-bar-container">
+        <div class="sens-bar-tc" id="bar-sens-tc"></div>
+      </div>
+      
+      <div class="sensitivity-row">
+        <span>|∂<i>η</i>/∂<i>T</i><sub>H</sub>| = <i>T</i><sub>C</sub>/<i>T</i><sub>H</sub>² :</span>
+        <span id="readout-sens-th" style="color:var(--crimson);">0,00062 K⁻¹</span>
+      </div>
+      <div class="sens-bar-container">
+        <div class="sens-bar-th" id="bar-sens-th"></div>
+      </div>
+      <div style="font-size:0.7rem; color:var(--text-muted); font-style:italic;">
+        Mendinginkan <i>T</i><sub>C</sub> sebesar 1 K terbukti 2× lebih efektif menaikkan efisiensi dibanding memanaskan <i>T</i><sub>H</sub> sebesar 1 K!
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer>
+  Simulator Siklus Carnot & Indikator Termodinamika Kimia • Dirancang Mandiri Tanpa Plagiasi Berdasarkan Pemetaan Bab III Laporan UTS • FKIP Universitas Sriwijaya (2026)
+</footer>
+
+<!-- SIMULATOR JAVASCRIPT LOGIC -->
+<script>
+(function() {
+  // DOM References
+  const canvasEngine = document.getElementById('engineCanvas');
+  const ctxEngine = canvasEngine.getContext('2d');
+  const canvasScope = document.getElementById('scopeCanvas');
+  const ctxScope = canvasScope.getContext('2d');
+
+  // Sliders
+  const sliderTH = document.getElementById('slider-th');
+  const sliderTC = document.getElementById('slider-tc');
+  const sliderVRatio = document.getElementById('slider-vratio');
+  const sliderSpeed = document.getElementById('slider-speed');
+
+  const lblTH = document.getElementById('lbl-th');
+  const lblTC = document.getElementById('lbl-tc');
+  const lblVRatio = document.getElementById('lbl-vratio');
+  const lblSpeed = document.getElementById('lbl-speed');
+
+  // Telemetry Readouts
+  const elPhase = document.getElementById('readout-phase');
+  const elTemp = document.getElementById('readout-temp');
+  const elPress = document.getElementById('readout-press');
+  const elVol = document.getElementById('readout-vol');
+  const elQH = document.getElementById('readout-qh');
+  const elQC = document.getElementById('readout-qc');
+  const elWnet = document.getElementById('readout-wnet');
+  const elEff = document.getElementById('readout-eff');
+  const elDS = document.getElementById('readout-ds');
+  const elContactBadge = document.getElementById('badge-contact');
+  const elCommTitle = document.getElementById('comm-title');
+  const elCommText = document.getElementById('comm-text');
+
+  const elSensTC = document.getElementById('readout-sens-tc');
+  const elSensTH = document.getElementById('readout-sens-th');
+  const barSensTC = document.getElementById('bar-sens-tc');
+  const barSensTH = document.getElementById('bar-sens-th');
+
+  // Buttons
+  const btnPlay = document.getElementById('btn-play-pause');
+  const btnStepFwd = document.getElementById('btn-step-fwd');
+  const btnStepBack = document.getElementById('btn-step-back');
+  const btnReset = document.getElementById('btn-reset-cycle');
+  const btnHots1 = document.getElementById('preset-hots1');
+  const btnPowerPlant = document.getElementById('preset-powerplant');
+  const btnCryo = document.getElementById('preset-cryo');
+
+  // Thermodynamic State Parameters
+  let n = 2.0; // mol gas diatomik
+  let R = 8.3145; // J/(mol*K)
+  let gamma = 1.40; // rasio kapasitas panas diatomik N2
+  let CV = (5/2) * R;
+
+  let TH = parseFloat(sliderTH.value); // 800 K
+  let TC = parseFloat(sliderTC.value); // 400 K
+  let VRatio = parseFloat(sliderVRatio.value); // 2.0
+  let simSpeed = parseFloat(sliderSpeed.value);
+
+  let VA = 5.0; // Liter
+  let VB = VA * VRatio; // 10.0 L
+  let VC = VB * Math.pow(TH / TC, 1 / (gamma - 1)); // ~ 56.57 L
+  let VD = VA * Math.pow(TH / TC, 1 / (gamma - 1)); // ~ 28.28 L
+
+  // Animation Progress: 0.0 to 4.0 (0-1: I, 1-2: II, 2-3: III, 3-4: IV)
+  let progress = 0.0;
+  let isPlaying = false;
+  let animId = null;
+
+  // Particle System in Cylinder
+  const NUM_PARTICLES = 90;
+  const particles = [];
+  for (let i = 0; i < NUM_PARTICLES; i++) {
+    particles.push({
+      x: Math.random() * 200 + 70,
+      y: Math.random() * 140 + 130,
+      vx: (Math.random() - 0.5) * 2,
+      vy: (Math.random() - 0.5) * 2,
+      radius: 3.2
+    });
+  }
+
+  // Update Theoretical Limits
+  function updateThermodynamics() {
+    VB = VA * VRatio;
+    VC = VB * Math.pow(TH / TC, 1 / (gamma - 1));
+    VD = VA * Math.pow(TH / TC, 1 / (gamma - 1));
+
+    let qH = n * R * TH * Math.log(VB / VA); // Joules
+    let qC = - n * R * TC * Math.log(VC / VD); // negative Joules
+    let Wnet = qH + qC;
+    let eta = 1 - (TC / TH);
+
+    // Sensitivities
+    let dEta_dTC = 1 / TH;
+    let dEta_dTH = TC / (TH * TH);
+
+    elQH.textContent = `+${(qH / 1000).toFixed(2)} kJ`;
+    elQC.textContent = `${(qC / 1000).toFixed(2)} kJ`;
+    elWnet.textContent = `+${(Wnet / 1000).toFixed(2)} kJ`;
+    elEff.textContent = `${(eta * 100).toFixed(1)} %`;
+    elDS.textContent = `0,00 J/K`;
+
+    elSensTC.textContent = `${dEta_dTC.toFixed(5)} K⁻¹`;
+    elSensTH.textContent = `${dEta_dTH.toFixed(5)} K⁻¹`;
+
+    let ratioBar = (dEta_dTH / dEta_dTC) * 100;
+    barSensTC.style.width = '100%';
+    barSensTH.style.width = `${Math.min(100, Math.max(10, ratioBar))}%`;
+  }
+
+  // Calculate Instant State (V, P, T, S) from Progress (0 to 4)
+  function getInstantState(p) {
+    let phase = Math.floor(p) % 4;
+    let frac = p - Math.floor(p);
+    let curV, curT, curP, curS;
+    let SA = 0.0;
+    let SB = n * R * Math.log(VB / VA);
+
+    if (phase === 0) { // Phase I: A -> B (Isothermal at TH)
+      curT = TH;
+      curV = VA * Math.pow(VB / VA, frac);
+      curP = (n * R * curT) / (curV * 1e-3) / 101325; // atm
+      curS = SA + frac * (SB - SA);
+    } else if (phase === 1) { // Phase II: B -> C (Adiabatic from TH to TC)
+      curV = VB + frac * (VC - VB);
+      curT = TH * Math.pow(VB / curV, gamma - 1);
+      curP = (n * R * curT) / (curV * 1e-3) / 101325;
+      curS = SB; // isentropic
+    } else if (phase === 2) { // Phase III: C -> D (Isothermal at TC)
+      curT = TC;
+      curV = VC * Math.pow(VD / VC, frac);
+      curP = (n * R * curT) / (curV * 1e-3) / 101325;
+      curS = SB - frac * (SB - SA);
+    } else { // Phase IV: D -> A (Adiabatic from TC to TH)
+      curV = VD - frac * (VD - VA);
+      curT = TC * Math.pow(VD / curV, gamma - 1);
+      curP = (n * R * curT) / (curV * 1e-3) / 101325;
+      curS = SA; // isentropic
+    }
+
+    return { phase, frac, V: curV, T: curT, P: curP, S: curS };
+  }
+
+  // Update UI Commentary and Badges
+  
+  // Phase Inspector Data Bank
+  const phaseDetails = [
+    {
+      title: "TAHAP I: EKSPANSI ISOTERMAL REVERSIBEL (A → B)",
+      badge: "Kontak: Reservoir Panas <i>T</i><sub>H</sub> = {TH} K • Fluida Menyerap Kalor <i>q</i><sub>H</sub>",
+      badgeColor: "#EF4444",
+      badgeBg: "rgba(239, 68, 68, 0.2)",
+      micro: "Partikel molekul gas menerima pasokan energi kinetik termal dari dinding dasar silinder. Meskipun volume bertambah dan partikel berekspansi, kecepatan rata-rata partikel (<i>v</i><sub>rms</sub>) tetap konstan karena temperatur terjaga stabil pada <i>T</i><sub>H</sub>.",
+      macro: "Piston bergerak naik secara kuasi-statik (teramat perlahan) dari volume <i>V</i><sub>A</sub> ({VA} L) ke <i>V</i><sub>B</sub> ({VB} L). Gaya dorong gas berimbang sempurna dengan gaya luar (<i>P</i><sub>int</sub> = <i>P</i><sub>ext</sub> ± <i>dP</i>).",
+      thermo: "• Δ<i>U</i><sub>I</sub> = 0 J (karena <i>U</i> = <i>f</i>(<i>T</i>), <i>dT</i> = 0)<br>• Kerja: <i>w</i><sub>I</sub> = −<i>nRT</i><sub>H</sub> ln(<i>V</i><sub>B</sub>/<i>V</i><sub>A</sub>) = −{qH_kJ} kJ<br>• Kalor: <i>q</i><sub>H</sub> = +{qH_kJ} kJ (Kalor masuk bertanda positif)<br>• Entropi: Δ<i>S</i><sub>I</sub> = <i>q</i><sub>H</sub> / <i>T</i><sub>H</sub> = +{dS_val} J/K",
+      graph: "• Bidang <i>P</i>–<i>V</i>: Titik meluncur turun landai menyusuri kurva isotermal solid ((∂<i>P</i>/∂<i>V</i>)<sub><i>T</i></sub> = −<i>P</i>/<i>V</i>).<br>• Bidang <i>T</i>–<i>S</i>: Garis horizontal lurus ke kanan pada ketinggian <i>T</i> = <i>T</i><sub>H</sub> ({TH} K).",
+      alert: "Mengapa Δ<i>U</i> = 0 padahal gas menyerap kalor {qH_kJ} kJ? Karena seluruh energi kalor yang diserap langsung dialirkan keluar untuk mendorong piston (<i>w</i><sub>ekspansi</sub> = −<i>q</i><sub>H</sub>), sehingga energi dalam fluida kerja tidak mengalami kenaikan!"
+    },
+    {
+      title: "TAHAP II: EKSPANSI ADIABATIK REVERSIBEL (B → C)",
+      badge: "Kontak: Dudukan Insulator Termal (<i>k</i> = 0) • Terisolasi Penuh (<i>q</i> = 0)",
+      badgeColor: "#94A3B8",
+      badgeBg: "rgba(148, 163, 184, 0.2)",
+      micro: "Karena dasar silinder terisolasi sempurna (<i>k</i> = 0), tidak ada kalor yang dapat masuk (<i>q</i> = 0). Molekul gas terus mendorong piston dengan mengorbankan energi kinetik translasi internalnya, menyebabkan tumbukan molekul melemah dan suhu anjlok drastis.",
+      macro: "Silinder dipindahkan ke pelat insulator. Piston terus berekspansi secara inersial dari <i>V</i><sub>B</sub> ({VB} L) ke volume maksimum <i>V</i><sub>C</sub> ({VC} L). Tekanan gas turun drastis seiring pendinginan dari <i>T</i><sub>H</sub> ({TH} K) ke <i>T</i><sub>C</sub> ({TC} K).",
+      thermo: "• Kalor: <i>q</i><sub>II</sub> = 0 J (Proses Adiabatik Murni)<br>• Kerja: <i>w</i><sub>II</sub> = Δ<i>U</i><sub>II</sub> = <i>nC</i><sub>V</sub>(<i>T</i><sub>C</sub> − <i>T</i><sub>H</sub>) = −{wII_kJ} kJ<br>• Relasi Suhu–Volume: <i>T</i><sub>H</sub> · <i>V</i><sub>B</sub><sup>γ−1</sup> = <i>T</i><sub>C</sub> · <i>V</i><sub>C</sub><sup>γ−1</sup><br>• Entropi: Δ<i>S</i><sub>II</sub> = ∫(<i>dq</i><sub>rev</sub>/<i>T</i>) = 0 J/K (Isentropik)",
+      graph: "• Bidang <i>P</i>–<i>V</i>: Titik meluncur turun curam menyusuri kurva putus-putus bergradien ((∂<i>P</i>/∂<i>V</i>)<sub><i>S</i></sub> = −γ<i>P</i>/<i>V</i>) yang 40% lebih curam daripada kurva isotermal.<br>• Bidang <i>T</i>–<i>S</i>: Garis vertikal tegak lurus ke bawah (Δ<i>S</i> = 0).",
+      alert: "Mengapa kurva adiabatik lebih curam daripada isotermal? Karena pada ekspansi adiabatik, penurunan tekanan terjadi akibat dua faktor simultan: pembesaran volume DAN anjloknya temperatur fluida kerja!"
+    },
+    {
+      title: "TAHAP III: KOMPRESI ISOTERMAL REVERSIBEL (C → D)",
+      badge: "Kontak: Reservoir Dingin <i>T</i><sub>C</sub> = {TC} K • Fluida Membuang Kalor <i>q</i><sub>C</sub>",
+      badgeColor: "#0284C7",
+      badgeBg: "rgba(2, 132, 199, 0.2)",
+      micro: "Piston menekan partikel gas dari luar. Energi mekanik kompresi yang diterima partikel langsung dilepaskan keluar sebagai fluks kalor <i>q</i><sub>C</sub> menuju reservoir pendingin, menjaga kecepatan termal molekul tetap stabil pada tingkat rendah <i>T</i><sub>C</sub>.",
+      macro: "Dasar silinder ditempelkan pada Reservoir Dingin <i>T</i><sub>C</sub>. Gaya mekanik dari luar menekan piston secara kuasi-statik dari volume <i>V</i><sub>C</sub> ({VC} L) ke <i>V</i><sub>D</sub> ({VD} L). Suhu fluida konstan pada <i>T</i><sub>C</sub> ({TC} K).",
+      thermo: "• Δ<i>U</i><sub>III</sub> = 0 J (karena <i>dT</i> = 0)<br>• Kerja: <i>w</i><sub>III</sub> = −<i>nRT</i><sub>C</sub> ln(<i>V</i><sub>D</sub>/<i>V</i><sub>C</sub>) = +{qC_kJ} kJ (Kerja dari luar)<br>• Kalor: <i>q</i><sub>C</sub> = −{qC_kJ} kJ (Kalor dibuang bertanda negatif)<br>• Entropi: Δ<i>S</i><sub>III</sub> = <i>q</i><sub>C</sub> / <i>T</i><sub>C</sub> = −{dS_val} J/K",
+      graph: "• Bidang <i>P</i>–<i>V</i>: Titik bergerak naik landai ke kiri menyusuri kurva isotermal bawah.<br>• Bidang <i>T</i>–<i>S</i>: Garis lurus horizontal ke kiri pada ketinggian <i>T</i> = <i>T</i><sub>C</sub> ({TC} K), membuang entropi fluida ke lingkungan.",
+      alert: "Mengapa kalor harus dibuang ke reservoir dingin? Tanpa membuang kalor pada temperatur rendah, gas tidak dapat dikompresi kembali ke volume awal tanpa memerlukan kerja yang sama besarnya dengan kerja ekspansi (kerja netto akan nol!)."
+    },
+    {
+      title: "TAHAP IV: KOMPRESI ADIABATIK REVERSIBEL (D → A)",
+      badge: "Kontak: Dudukan Insulator Termal (<i>k</i> = 0) • Siklus Tertutup di Titik A",
+      badgeColor: "#F59E0B",
+      badgeBg: "rgba(245, 158, 11, 0.2)",
+      micro: "Silinder kembali diisolasi (<i>q</i> = 0). Piston terus menekan gas secara cepat dan kuasi-statik, mentransfer energi mekanik langsung menjadi peningkatan kecepatan acak partikel molekuler, memanaskan kembali gas ke keadaan termal semula.",
+      macro: "Piston ditekan lebih lanjut dari <i>V</i><sub>D</sub> ({VD} L) kembali tepat ke volume awal <i>V</i><sub>A</sub> ({VA} L). Kerja mekanik kompresi menaikkan temperatur gas dari <i>T</i><sub>C</sub> ({TC} K) kembali tepat ke <i>T</i><sub>H</sub> ({TH} K).",
+      thermo: "• Kalor: <i>q</i><sub>IV</sub> = 0 J (Isolasi total)<br>• Kerja: <i>w</i><sub>IV</sub> = Δ<i>U</i><sub>IV</sub> = <i>nC</i><sub>V</sub>(<i>T</i><sub>H</sub> − <i>T</i><sub>C</sub>) = +{wII_kJ} kJ<br>• Relasi Suhu–Volume: <i>T</i><sub>C</sub> · <i>V</i><sub>D</sub><sup>γ−1</sup> = <i>T</i><sub>H</sub> · <i>V</i><sub>A</sub><sup>γ−1</sup><br>• Entropi: Δ<i>S</i><sub>IV</sub> = 0 J/K (Isentropik)",
+      graph: "• Bidang <i>P</i>–<i>V</i>: Titik naik curam menyusuri kurva adiabatik putus-putus hingga tepat menutup siklus di Titik A.<br>• Bidang <i>T</i>–<i>S</i>: Garis vertikal tegak lurus ke atas dari <i>T</i><sub>C</sub> ke <i>T</i><sub>H</sub> pada entropi <i>S</i> = 0.",
+      alert: "Keberhasilan Tahap IV membuktikan Teorema Siklus Clausius: ∮(<i>dq</i><sub>rev</sub>/<i>T</i>) = 0 dan ∮<i>dU</i> = 0, membuktikan bahwa energi dalam dan entropi adalah fungsi keadaan sejati!"
+    }
+  ];
+
+  // DOM Elements for Inspector
+  const inspHeaderTitle = document.getElementById('insp-header-title');
+  const inspHeaderBadge = document.getElementById('insp-header-badge');
+  const inspMicro = document.getElementById('insp-micro');
+  const inspMacro = document.getElementById('insp-macro');
+  const inspThermo = document.getElementById('insp-thermo');
+  const inspGraph = document.getElementById('insp-graph');
+  const inspAlertText = document.getElementById('insp-alert-text');
+  const phaseTabBtns = [
+    document.getElementById('tab-phase-0'),
+    document.getElementById('tab-phase-1'),
+    document.getElementById('tab-phase-2'),
+    document.getElementById('tab-phase-3')
+  ];
+
+  function updatePhaseInspector(phaseIdx) {
+    const data = phaseDetails[phaseIdx];
+    const qH_val = n * R * TH * Math.log(VB / VA);
+    const qC_val = n * R * TC * Math.log(VC / VD);
+    const wII_val = n * CV * (TH - TC);
+    const dS_val = (qH_val / TH);
+
+    // Replace template variables
+    function formatStr(str) {
+      return str.replace(/{TH}/g, Math.round(TH))
+                .replace(/{TC}/g, Math.round(TC))
+                .replace(/{VA}/g, VA.toFixed(1))
+                .replace(/{VB}/g, VB.toFixed(1))
+                .replace(/{VC}/g, VC.toFixed(1))
+                .replace(/{VD}/g, VD.toFixed(1))
+                .replace(/{qH_kJ}/g, (qH_val / 1000).toFixed(2))
+                .replace(/{qC_kJ}/g, (qC_val / 1000).toFixed(2))
+                .replace(/{wII_kJ}/g, (wII_val / 1000).toFixed(2))
+                .replace(/{dS_val}/g, dS_val.toFixed(2));
+    }
+
+    inspHeaderTitle.innerHTML = `<span style="color:${data.badgeColor};">●</span> ${formatStr(data.title)}`;
+    inspHeaderBadge.innerHTML = formatStr(data.badge);
+    inspHeaderBadge.style.color = data.badgeColor;
+    inspHeaderBadge.style.background = data.badgeBg;
+    inspHeaderBadge.style.borderColor = data.badgeColor;
+
+    inspMicro.innerHTML = formatStr(data.micro);
+    inspMacro.innerHTML = formatStr(data.macro);
+    inspThermo.innerHTML = formatStr(data.thermo);
+    inspGraph.innerHTML = formatStr(data.graph);
+    inspAlertText.innerHTML = formatStr(data.alert);
+
+    // Update active tab buttons
+    phaseTabBtns.forEach((btn, idx) => {
+      if (idx === phaseIdx) {
+        btn.classList.add('active');
+        btn.classList.add(`phase-${idx}`);
+      } else {
+        btn.classList.remove('active');
+        btn.classList.remove(`phase-${idx}`);
+      }
+    });
+  }
+
+  // Phase Tab Click Listeners
+  phaseTabBtns.forEach((btn, idx) => {
+    btn.addEventListener('click', () => {
+      isPlaying = false;
+      btnPlay.textContent = '▶ Putar Tahap ' + ['I', 'II', 'III', 'IV'][idx];
+      btnPlay.className = 'btn btn-primary';
+      progress = idx;
+      render();
+      updatePhaseInspector(idx);
+    });
+  });
+
+  function updateUI(state) {
+    updatePhaseInspector(state.phase);
+    elTemp.textContent = `${state.T.toFixed(1)} K`;
+    elPress.textContent = `${state.P.toFixed(2)} atm`;
+    elVol.textContent = `${state.V.toFixed(2)} L`;
+
+    if (state.phase === 0) {
+      elPhase.textContent = 'Tahap I (A→B)';
+      elPhase.className = 'telemetry-value val-crimson';
+      elContactBadge.innerHTML = `Kontak: Reservoir Panas <i>T</i><sub>H</sub> (${TH} K)`;
+      elContactBadge.style.background = '#DC2626';
+      elCommTitle.textContent = 'Tahap I: Ekspansi Isotermal Reversibel (A → B)';
+      elCommText.innerHTML = `Dasar silinder menempel pada Reservoir Panas <i>T</i><sub>H</sub> (${TH} K). Gas menyerap kalor <i>q</i><sub>H</sub> sambil berekspansi perlahan dari ${VA.toFixed(1)} L ke ${VB.toFixed(1)} L. Suhu konstan (Δ<i>U</i> = 0), seluruh kalor dikonversi menjadi kerja ekspansi.`;
+    } else if (state.phase === 1) {
+      elPhase.textContent = 'Tahap II (B→C)';
+      elPhase.className = 'telemetry-value';
+      elContactBadge.textContent = 'Dudukan Insulator (k = 0)';
+      elContactBadge.style.background = '#475569';
+      elCommTitle.textContent = 'Tahap II: Ekspansi Adiabatik Reversibel (B → C)';
+      elCommText.innerHTML = `Silinder dipindahkan ke pelat insulator termal (<i>q</i> = 0). Gas terus mendorong piston secara inersial dari ${VB.toFixed(1)} L ke ${VC.toFixed(1)} L dengan mengorbankan energi dalamnya. Suhu gas turun drastis dari ${TH} K ke ${TC} K (Isentropik, Δ<i>S</i> = 0).`;
+    } else if (state.phase === 2) {
+      elPhase.textContent = 'Tahap III (C→D)';
+      elPhase.className = 'telemetry-value val-cryo';
+      elContactBadge.innerHTML = `Kontak: Reservoir Dingin <i>T</i><sub>C</sub> (${TC} K)`;
+      elContactBadge.style.background = '#0284C7';
+      elCommTitle.textContent = 'Tahap III: Kompresi Isotermal Reversibel (C → D)';
+      elCommText.innerHTML = `Dasar silinder menempel pada Reservoir Dingin <i>T</i><sub>C</sub> (${TC} K). Gaya luar menekan piston dari ${VC.toFixed(1)} L ke ${VD.toFixed(1)} L. Kalor kompresi dibuang ke pendingin (<i>q</i><sub>C</sub>) agar temperatur konstan, membuang entropi fluida ke lingkungan.`;
+    } else {
+      elPhase.textContent = 'Tahap IV (D→A)';
+      elPhase.className = 'telemetry-value';
+      elContactBadge.textContent = 'Dudukan Insulator (k = 0)';
+      elContactBadge.style.background = '#475569';
+      elCommTitle.textContent = 'Tahap IV: Kompresi Adiabatik Reversibel (D → A)';
+      elCommText.innerHTML = `Silinder kembali diletakkan di dudukan insulator (<i>q</i> = 0). Kompresi mekanik dari luar menaikkan energi dalam gas secara penuh, mengembalikan temperatur dari ${TC} K tepat ke ${TH} K dan menutup siklus di Titik A.`;
+    }
+  }
+
+  // Draw Cylinder Engine Canvas
+  function drawEngine(state) {
+    const w = canvasEngine.width;
+    const h = canvasEngine.height;
+    ctxEngine.clearRect(0, 0, w, h);
+
+    // Coordinates of Cylinder
+    const cylX = 60;
+    const cylY = 40;
+    const cylW = 220;
+    const cylH = 270;
+
+    // Map Volume (VA = 5 L, VC = max L) to Piston Y position
+    // V_min = 5 L (highest compression, piston near bottom of travel), V_max = 60 L
+    const vMin = VA * 0.8;
+    const vMax = VC * 1.05;
+    const pFrac = (state.V - vMin) / (vMax - vMin);
+    const pistonY = cylY + 180 - (pFrac * 120); // travel range
+
+    // 1. Draw Thermal Base Platen (Moving Platen depending on Phase)
+    const baseH = 22;
+    const baseY = cylY + cylH;
+
+    if (state.phase === 0) { // Hot Reservoir
+      ctxEngine.fillStyle = '#DC2626';
+      ctxEngine.fillRect(cylX - 10, baseY, cylW + 20, baseH);
+      ctxEngine.fillStyle = '#FFFFFF';
+      ctxEngine.font = 'bold 11px sans-serif';
+      ctxEngine.textAlign = 'center';
+      ctxEngine.fillText(`RESERVOIR PANAS [ TH = ${TH} K ]  (Kalor Masuk ↑)`, cylX + cylW/2, baseY + 15);
+
+      // Heat flow arrows
+      ctxEngine.strokeStyle = '#FCA5A5';
+      ctxEngine.lineWidth = 2;
+      for (let x = cylX + 30; x < cylX + cylW; x += 40) {
+        ctxEngine.beginPath();
+        ctxEngine.moveTo(x, baseY + 4);
+        ctxEngine.lineTo(x, baseY - 12);
+        ctxEngine.lineTo(x - 4, baseY - 8);
+        ctxEngine.moveTo(x, baseY - 12);
+        ctxEngine.lineTo(x + 4, baseY - 8);
+        ctxEngine.stroke();
+      }
+    } else if (state.phase === 2) { // Cold Reservoir
+      ctxEngine.fillStyle = '#0284C7';
+      ctxEngine.fillRect(cylX - 10, baseY, cylW + 20, baseH);
+      ctxEngine.fillStyle = '#FFFFFF';
+      ctxEngine.font = 'bold 11px sans-serif';
+      ctxEngine.textAlign = 'center';
+      ctxEngine.fillText(`RESERVOIR DINGIN [ TC = ${TC} K ]  (Kalor Buang ↓)`, cylX + cylW/2, baseY + 15);
+
+      // Heat flow arrows down
+      ctxEngine.strokeStyle = '#BAE6FD';
+      ctxEngine.lineWidth = 2;
+      for (let x = cylX + 30; x < cylX + cylW; x += 40) {
+        ctxEngine.beginPath();
+        ctxEngine.moveTo(x, baseY - 4);
+        ctxEngine.lineTo(x, baseY + 12);
+        ctxEngine.lineTo(x - 4, baseY + 8);
+        ctxEngine.moveTo(x, baseY + 12);
+        ctxEngine.lineTo(x + 4, baseY + 8);
+        ctxEngine.stroke();
+      }
+    } else { // Insulator
+      ctxEngine.fillStyle = '#475569';
+      ctxEngine.fillRect(cylX - 10, baseY, cylW + 20, baseH);
+      ctxEngine.fillStyle = '#E2E8F0';
+      ctxEngine.font = 'bold 11px sans-serif';
+      ctxEngine.textAlign = 'center';
+      ctxEngine.fillText('DUDUKAN INSULATOR TERMAL (k = 0, q = 0)', cylX + cylW/2, baseY + 15);
+    }
+
+    // 2. Gas Region Background Tint based on Temperature
+    const tempFrac = (state.T - TC) / Math.max(1, (TH - TC)); // 0 = Cold, 1 = Hot
+    const gasR = Math.round(2 + tempFrac * 220);
+    const gasG = Math.round(132 - tempFrac * 60);
+    const gasB = Math.round(199 - tempFrac * 150);
+    ctxEngine.fillStyle = `rgba(${gasR}, ${gasG}, ${gasB}, 0.22)`;
+    ctxEngine.fillRect(cylX + 6, pistonY + 16, cylW - 12, (cylY + cylH) - (pistonY + 16));
+
+    // 3. Cylinder Walls (Glass Transparent Look)
+    ctxEngine.strokeStyle = '#94A3B8';
+    ctxEngine.lineWidth = 4;
+    ctxEngine.beginPath();
+    ctxEngine.moveTo(cylX, cylY);
+    ctxEngine.lineTo(cylX, cylY + cylH);
+    ctxEngine.lineTo(cylX + cylW, cylY + cylH);
+    ctxEngine.lineTo(cylX + cylW, cylY);
+    ctxEngine.stroke();
+
+    // Volume Graduation Ticks
+    ctxEngine.strokeStyle = '#64748B';
+    ctxEngine.lineWidth = 1;
+    ctxEngine.font = '9px monospace';
+    ctxEngine.fillStyle = '#94A3B8';
+    ctxEngine.textAlign = 'right';
+    for (let v = 10; v <= 50; v += 10) {
+      let f = (v - vMin) / (vMax - vMin);
+      let y = cylY + 180 - (f * 120) + 16;
+      if (y > cylY + 20 && y < cylY + cylH - 10) {
+        ctxEngine.beginPath();
+        ctxEngine.moveTo(cylX, y);
+        ctxEngine.lineTo(cylX + 10, y);
+        ctxEngine.stroke();
+        ctxEngine.fillText(`${v}L`, cylX - 4, y + 3);
+      }
+    }
+
+    // 4. Update and Draw Molecular Gas Particles
+    const speedMult = Math.sqrt(state.T / 400.0) * 1.6;
+    ctxEngine.fillStyle = `rgb(${gasR}, ${Math.min(255, gasG + 40)}, ${gasB})`;
+    const pTop = pistonY + 18;
+    const pBottom = cylY + cylH - 6;
+    const pLeft = cylX + 10;
+    const pRight = cylX + cylW - 10;
+
+    for (let p of particles) {
+      p.x += p.vx * speedMult;
+      p.y += p.vy * speedMult;
+
+      if (p.x < pLeft) { p.x = pLeft; p.vx *= -1; }
+      if (p.x > pRight) { p.x = pRight; p.vx *= -1; }
+      if (p.y < pTop) { p.y = pTop; p.vy *= -1; }
+      if (p.y > pBottom) { p.y = pBottom; p.vy *= -1; }
+
+      ctxEngine.beginPath();
+      ctxEngine.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctxEngine.fill();
+    }
+
+    // 5. Piston Head and Rod
+    ctxEngine.fillStyle = '#CBD5E1';
+    ctxEngine.strokeStyle = '#475569';
+    ctxEngine.lineWidth = 2;
+    ctxEngine.fillRect(cylX + 4, pistonY, cylW - 8, 16);
+    ctxEngine.strokeRect(cylX + 4, pistonY, cylW - 8, 16);
+
+    // Connecting Rod & Top Handle
+    ctxEngine.fillStyle = '#94A3B8';
+    ctxEngine.fillRect(cylX + cylW/2 - 8, pistonY - 45, 16, 45);
+    ctxEngine.fillStyle = '#64748B';
+    ctxEngine.fillRect(cylX + cylW/2 - 30, pistonY - 50, 60, 10);
+  }
+
+  // Draw Dual Scope (P-V and T-S) Canvas
+  function drawScope(state) {
+    const w = canvasScope.width;
+    const h = canvasScope.height;
+    ctxScope.clearRect(0, 0, w, h);
+
+    const pad = 42;
+    const graphH = 145;
+    const graphW = w - 2 * pad;
+
+    // --- SCOPE 1: P - V DIAGRAM (TOP HALF) ---
+    const pvY0 = pad;
+    const pvY1 = pvY0 + graphH;
+
+    // Grid & Axes
+    ctxScope.strokeStyle = '#1E293B';
+    ctxScope.lineWidth = 1;
+    ctxScope.strokeRect(pad, pvY0, graphW, graphH);
+
+    ctxScope.fillStyle = '#CBD5E1';
+    ctxScope.font = 'bold 11px sans-serif';
+    ctxScope.textAlign = 'left';
+    ctxScope.fillText('DIAGRAM TEKANAN – VOLUME (P – V)', pad + 6, pvY0 + 16);
+
+    // Ranges for Mapping
+    const vScaleMin = VA * 0.7;
+    const vScaleMax = VC * 1.1;
+    const pScaleMin = 0.0;
+    const pScaleMax = 30.0; // atm
+
+    function mapPV(v, p) {
+      let x = pad + ((v - vScaleMin) / (vScaleMax - vScaleMin)) * graphW;
+      let y = pvY1 - ((p - pScaleMin) / (pScaleMax - pScaleMin)) * graphH;
+      return { x, y };
+    }
+
+    // Sample Curves for Carnot Loop
+    const steps = 40;
+    const ptsI = [], ptsII = [], ptsIII = [], ptsIV = [];
+
+    for (let i = 0; i <= steps; i++) {
+      let f = i / steps;
+      // I: A -> B
+      let v1 = VA * Math.pow(VB / VA, f);
+      let p1 = (n * R * TH) / (v1 * 1e-3) / 101325;
+      ptsI.push(mapPV(v1, p1));
+
+      // II: B -> C
+      let v2 = VB + f * (VC - VB);
+      let t2 = TH * Math.pow(VB / v2, gamma - 1);
+      let p2 = (n * R * t2) / (v2 * 1e-3) / 101325;
+      ptsII.push(mapPV(v2, p2));
+
+      // III: C -> D
+      let v3 = VC * Math.pow(VD / VC, f);
+      let p3 = (n * R * TC) / (v3 * 1e-3) / 101325;
+      ptsIII.push(mapPV(v3, p3));
+
+      // IV: D -> A
+      let v4 = VD - f * (VD - VA);
+      let t4 = TC * Math.pow(VD / v4, gamma - 1);
+      let p4 = (n * R * t4) / (v4 * 1e-3) / 101325;
+      ptsIV.push(mapPV(v4, p4));
+    }
+
+    // Fill Closed Work Area
+    ctxScope.fillStyle = 'rgba(16, 185, 129, 0.22)';
+    ctxScope.beginPath();
+    ctxScope.moveTo(ptsI[0].x, ptsI[0].y);
+    ptsI.forEach(p => ctxScope.lineTo(p.x, p.y));
+    ptsII.forEach(p => ctxScope.lineTo(p.x, p.y));
+    ptsIII.forEach(p => ctxScope.lineTo(p.x, p.y));
+    ptsIV.forEach(p => ctxScope.lineTo(p.x, p.y));
+    ctxScope.closePath();
+    ctxScope.fill();
+
+    // Draw Curve Boundaries
+    // I: Isothermal TH (Crimson)
+    ctxScope.strokeStyle = '#EF4444';
+    ctxScope.lineWidth = 2.5;
+    ctxScope.beginPath();
+    ptsI.forEach((p, idx) => idx === 0 ? ctxScope.moveTo(p.x, p.y) : ctxScope.lineTo(p.x, p.y));
+    ctxScope.stroke();
+
+    // II: Adiabatic (Slate Dashed)
+    ctxScope.strokeStyle = '#94A3B8';
+    ctxScope.lineWidth = 2.0;
+    ctxScope.setLineDash([4, 4]);
+    ctxScope.beginPath();
+    ptsII.forEach((p, idx) => idx === 0 ? ctxScope.moveTo(p.x, p.y) : ctxScope.lineTo(p.x, p.y));
+    ctxScope.stroke();
+    ctxScope.setLineDash([]);
+
+    // III: Isothermal TC (Cryo Blue)
+    ctxScope.strokeStyle = '#0284C7';
+    ctxScope.lineWidth = 2.5;
+    ctxScope.beginPath();
+    ptsIII.forEach((p, idx) => idx === 0 ? ctxScope.moveTo(p.x, p.y) : ctxScope.lineTo(p.x, p.y));
+    ctxScope.stroke();
+
+    // IV: Adiabatic (Slate Dashed)
+    ctxScope.strokeStyle = '#94A3B8';
+    ctxScope.lineWidth = 2.0;
+    ctxScope.setLineDash([4, 4]);
+    ctxScope.beginPath();
+    ptsIV.forEach((p, idx) => idx === 0 ? ctxScope.moveTo(p.x, p.y) : ctxScope.lineTo(p.x, p.y));
+    ctxScope.stroke();
+    ctxScope.setLineDash([]);
+
+    // Active Moving Coordinate Dot on P-V
+    const curPVMapped = mapPV(state.V, state.P);
+    ctxScope.fillStyle = '#F59E0B';
+    ctxScope.shadowColor = '#F59E0B';
+    ctxScope.shadowBlur = 10;
+    ctxScope.beginPath();
+    ctxScope.arc(curPVMapped.x, curPVMapped.y, 6, 0, Math.PI * 2);
+    ctxScope.fill();
+    ctxScope.shadowBlur = 0;
+
+    // --- SCOPE 2: T - S DIAGRAM (BOTTOM HALF) ---
+    const tsY0 = pvY1 + 30;
+    const tsY1 = tsY0 + (h - tsY0 - 24);
+
+    ctxScope.strokeStyle = '#1E293B';
+    ctxScope.strokeRect(pad, tsY0, graphW, tsY1 - tsY0);
+
+    ctxScope.fillStyle = '#CBD5E1';
+    ctxScope.font = 'bold 11px sans-serif';
+    ctxScope.textAlign = 'left';
+    ctxScope.fillText('DIAGRAM SUHU – ENTROPI (T – S)', pad + 6, tsY0 + 16);
+
+    const sScaleMin = -1.0;
+    const SB_val = n * R * Math.log(VB / VA);
+    const sScaleMax = SB_val * 1.35;
+    const tScaleMin = 200.0;
+    const tScaleMax = 1200.0;
+
+    function mapTS(s, t) {
+      let x = pad + ((s - sScaleMin) / (sScaleMax - sScaleMin)) * graphW;
+      let y = tsY1 - ((t - tScaleMin) / (tScaleMax - tScaleMin)) * (tsY1 - tsY0);
+      return { x, y };
+    }
+
+    const ptTS_A = mapTS(0.0, TH);
+    const ptTS_B = mapTS(SB_val, TH);
+    const ptTS_C = mapTS(SB_val, TC);
+    const ptTS_D = mapTS(0.0, TC);
+
+    // Fill Rectangle Area
+    ctxScope.fillStyle = 'rgba(16, 185, 129, 0.22)';
+    ctxScope.fillRect(ptTS_A.x, ptTS_A.y, ptTS_B.x - ptTS_A.x, ptTS_C.y - ptTS_A.y);
+
+    // Outline Box
+    ctxScope.strokeStyle = '#EF4444'; // top (TH)
+    ctxScope.lineWidth = 2.5;
+    ctxScope.beginPath();
+    ctxScope.moveTo(ptTS_A.x, ptTS_A.y);
+    ctxScope.lineTo(ptTS_B.x, ptTS_B.y);
+    ctxScope.stroke();
+
+    ctxScope.strokeStyle = '#94A3B8'; // right isentropic
+    ctxScope.setLineDash([4, 4]);
+    ctxScope.beginPath();
+    ctxScope.moveTo(ptTS_B.x, ptTS_B.y);
+    ctxScope.lineTo(ptTS_C.x, ptTS_C.y);
+    ctxScope.stroke();
+
+    ctxScope.strokeStyle = '#0284C7'; // bottom (TC)
+    ctxScope.setLineDash([]);
+    ctxScope.beginPath();
+    ctxScope.moveTo(ptTS_C.x, ptTS_C.y);
+    ctxScope.lineTo(ptTS_D.x, ptTS_D.y);
+    ctxScope.stroke();
+
+    ctxScope.strokeStyle = '#94A3B8'; // left isentropic
+    ctxScope.setLineDash([4, 4]);
+    ctxScope.beginPath();
+    ctxScope.moveTo(ptTS_D.x, ptTS_D.y);
+    ctxScope.lineTo(ptTS_A.x, ptTS_A.y);
+    ctxScope.stroke();
+    ctxScope.setLineDash([]);
+
+    // Active Moving Coordinate Dot on T-S
+    const curTSMapped = mapTS(state.S, state.T);
+    ctxScope.fillStyle = '#F59E0B';
+    ctxScope.shadowColor = '#F59E0B';
+    ctxScope.shadowBlur = 10;
+    ctxScope.beginPath();
+    ctxScope.arc(curTSMapped.x, curTSMapped.y, 6, 0, Math.PI * 2);
+    ctxScope.fill();
+    ctxScope.shadowBlur = 0;
+  }
+
+  // Master Render Loop
+  function render() {
+    const state = getInstantState(progress);
+    updateUI(state);
+    drawEngine(state);
+    drawScope(state);
+  }
+
+  // Animation Loop
+  let lastTime = performance.now();
+  function loop(currentTime) {
+    let dt = (currentTime - lastTime) / 1000.0;
+    lastTime = currentTime;
+
+    if (isPlaying) {
+      // Play ONLY the active phase, do not auto-advance to next phase
+      const currentPhase = Math.floor(progress) % 4;
+      const phaseDuration = 2.8 / simSpeed; // ~2.8s per phase at 1.0x speed
+      const targetEnd = currentPhase + 0.999;
+
+      progress += (1.0 / phaseDuration) * dt;
+
+      if (progress >= targetEnd) {
+        progress = targetEnd; // Freeze at exact end of this phase
+        isPlaying = false;
+        btnPlay.textContent = '▶ Putar Ulang Tahap ' + ['I', 'II', 'III', 'IV'][currentPhase];
+        btnPlay.className = 'btn';
+
+        // Provide educational prompt to proceed manually
+        const roman = ['I', 'II', 'III', 'IV'][currentPhase];
+        const nextNames = [
+          'Tahap II: Ekspansi Adiabatik Reversibel (B → C)',
+          'Tahap III: Kompresi Isotermal Reversibel (C → D)',
+          'Tahap IV: Kompresi Adiabatik Reversibel (D → A)',
+          'Tahap I: Ekspansi Isotermal Reversibel (A → B)'
+        ];
+        elCommTitle.innerHTML = `✅ Tahap ${roman} Selesai!`;
+        elCommText.innerHTML = `Tahap ${roman} telah tuntas dijalankan dan sistem berhenti di titik akhir tahap. Silakan telaah perubahan termodinamika pada panel di atas, lalu klik tombol <strong>[Tahap Berikutnya ❯]</strong> untuk melanjutkan ke <em>${nextNames[currentPhase]}</em>.`;
+      }
+      render();
+    }
+    animId = requestAnimationFrame(loop);
+  }
+
+  // Controls Event Listeners (Phase-Locked Navigation)
+  btnPlay.addEventListener('click', () => {
+    if (!isPlaying) {
+      // If already at the end of the phase, restart from beginning of this phase
+      let curPhase = Math.floor(progress) % 4;
+      let phaseFrac = progress - Math.floor(progress);
+      if (phaseFrac >= 0.99) {
+        progress = curPhase;
+      }
+      isPlaying = true;
+      btnPlay.textContent = '⏸ Jeda';
+      btnPlay.className = 'btn btn-primary';
+    } else {
+      isPlaying = false;
+      btnPlay.textContent = '▶ Lanjutkan Tahap';
+      btnPlay.className = 'btn';
+    }
+  });
+
+  btnStepFwd.addEventListener('click', () => {
+    isPlaying = false;
+    let curPhase = Math.floor(progress) % 4;
+    let nextPhase = (curPhase + 1) % 4;
+    progress = nextPhase; // Jump cleanly to the beginning of next phase
+    btnPlay.textContent = '▶ Putar Tahap ' + ['I', 'II', 'III', 'IV'][nextPhase];
+    btnPlay.className = 'btn btn-primary';
+    render();
+    updatePhaseInspector(nextPhase);
+  });
+
+  btnStepBack.addEventListener('click', () => {
+    isPlaying = false;
+    let curPhase = Math.floor(progress) % 4;
+    let prevPhase = (curPhase - 1 + 4) % 4;
+    progress = prevPhase; // Jump cleanly to the beginning of previous phase
+    btnPlay.textContent = '▶ Putar Tahap ' + ['I', 'II', 'III', 'IV'][prevPhase];
+    btnPlay.className = 'btn btn-primary';
+    render();
+    updatePhaseInspector(prevPhase);
+  });
+
+  btnReset.addEventListener('click', () => {
+    isPlaying = false;
+    progress = 0.0;
+    btnPlay.textContent = '▶ Putar Tahap I';
+    btnPlay.className = 'btn btn-primary';
+    render();
+    updatePhaseInspector(0);
+  });
+
+  // Slider Updates
+  sliderTH.addEventListener('input', (e) => {
+    TH = parseFloat(e.target.value);
+    if (TH <= TC + 50) {
+      TH = TC + 50;
+      e.target.value = TH;
+    }
+    lblTH.textContent = `${TH} K`;
+    updateThermodynamics();
+    render();
+  });
+
+  sliderTC.addEventListener('input', (e) => {
+    TC = parseFloat(e.target.value);
+    if (TC >= TH - 50) {
+      TC = TH - 50;
+      e.target.value = TC;
+    }
+    lblTC.textContent = `${TC} K`;
+    updateThermodynamics();
+    render();
+  });
+
+  sliderVRatio.addEventListener('input', (e) => {
+    VRatio = parseFloat(e.target.value);
+    lblVRatio.textContent = `${VRatio.toFixed(2)} x`;
+    updateThermodynamics();
+    render();
+  });
+
+  sliderSpeed.addEventListener('input', (e) => {
+    simSpeed = parseFloat(e.target.value);
+    lblSpeed.textContent = `${simSpeed.toFixed(2)} x`;
+  });
+
+  // Presets
+  btnHots1.addEventListener('click', () => {
+    sliderTH.value = 800; TH = 800; lblTH.textContent = '800 K';
+    sliderTC.value = 400; TC = 400; lblTC.textContent = '400 K';
+    sliderVRatio.value = 2.0; VRatio = 2.0; lblVRatio.textContent = '2.00 x';
+    updateThermodynamics();
+    render();
+  });
+
+  btnPowerPlant.addEventListener('click', () => {
+    sliderTH.value = 825; TH = 825; lblTH.textContent = '825 K';
+    sliderTC.value = 300; TC = 300; lblTC.textContent = '300 K';
+    sliderVRatio.value = 2.2; VRatio = 2.2; lblVRatio.textContent = '2.20 x';
+    updateThermodynamics();
+    render();
+  });
+
+  btnCryo.addEventListener('click', () => {
+    sliderTH.value = 500; TH = 500; lblTH.textContent = '500 K';
+    sliderTC.value = 250; TC = 250; lblTC.textContent = '250 K';
+    sliderVRatio.value = 1.8; VRatio = 1.8; lblVRatio.textContent = '1.80 x';
+    updateThermodynamics();
+    render();
+  });
+
+  // Init
+  updateThermodynamics();
+  render();
+  animId = requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
